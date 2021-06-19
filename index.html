@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Weather App</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            box-sizing : border-box;
+        }
+        html{
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            font-weight: 300;
+            height: fit-content;
+        }
+        section{
+            height: 100%;
+            width: 100%;
+            display: flex;
+            background-color: rgb(34,34,34);
+            padding: 100px, 0;
+        }
+        .container{
+            width: 100%;
+            max-width: 100%;
+            background-color: #00919f;
+            margin: 0 auto;
+            height: 100%;
+            position: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .container::after{
+            position:absolute;
+            content: ' ';
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height:100%;
+            width: 100%;
+            background: url(https://c4.wallpaperflare.com/wallpaper/347/980/841/photography-landscape-nature-sunset-wallpaper-preview.jpg);
+            
+            background-size: cover;
+            z-index: -1;
+        }
+        form{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        form input{
+            width: 100%;
+            height: 100%;
+            bottom: 10px;
+            outline: none;
+            border: none;
+            background-color: #3a3a3a;
+            opacity: 1;
+            font-size: 25px;
+            padding: 10px;
+            color: white;
+        }
+        form button[type="submit"]
+        {
+            width: 100px;
+            height: 100%;
+            outline: none;
+            border: none;
+            cursor: pointer;
+            background-color: #676767;
+            color: white;
+            font-size: 30px;
+        }
+        form button ion-icon
+        {
+            margin-bottom: -6px;
+        }
+        form input::placeholder
+        {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 1.2px;
+            font-size: 25px;
+        }
+        .container .details
+        {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #dfbebe94;
+            text-align: center;
+            padding: 30px 10px;
+            border-radius: 8px;
+        }
+        .temp
+        {
+            font-size: 30px;
+            color: #161f1f;
+        }
+        .status
+        {
+            margin: 10px 0 30px 0;
+        }
+        .more-info p
+        {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+        .query
+        {
+            margin-top: 20px;
+        }
+        .img
+        {
+            margin-top: 5px;
+        }
+    </style>
+    <body>
+        <section>
+            <div class="container">
+                <div class="details">
+                    <h1 class="pretext">Welcome and Search by Location!</h1>
+                    <!-- <h1 class="temp">30</h1>
+                    <h1 class="status">Cloudy</h1>
+                    <div class="more-info">
+                        <p>Info - 1</p>
+                        <p>Info - 2</p>
+                        <p>Info - 3</p>
+                        <p>Info - 4</p>
+                    </div> -->
+                </div>
+                <form>
+                    <input type="text" placeholder="Search any city..." name="location">
+                    <button type="submit">
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </button>
+                </form>
+            </div>
+            
+        </section>
+        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+        <script>
+            const key='0ccf5df746b7ed42261aef665d2384af'
+            const formE1=document.querySelector('form');
+            const details=document.querySelector('.details')
+            formE1.addEventListener('submit' ,(e) =>
+            {
+            e.preventDefault();
+            details.innerHTML= '<h1>Loading...</h1>';
+            const location = e.target.location.value;
+            weatherApp(location);
+            });
+
+            async function weatherApp(location)
+            {
+                const data = await fetchAPI(location);
+                generateHTML(data);
+            }
+
+            async function fetchAPI(location)
+            {
+                const baseURL = `http://api.weatherstack.com/current?access_key=${key}&query=${location}`;
+                const res= await fetch(baseURL);
+                const data =await res.json();
+                console.log(res);
+                return data;
+            }
+
+            function dateBuilder (d) {
+  let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  let day = days[d.getDay()];
+  let date = d.getDate();
+  let month = months[d.getMonth()];
+  let year = d.getFullYear();
+
+  return `${day} ${date} ${month} ${year}`;
+}
+
+            function generateHTML(data)
+            {
+                const html= `<h1 class="temp">${data.current.temperature}°C</h1>
+                    <img class="img" src="${data.current.weather_icons}"></img>
+                    <h1 class="status">${data.current.weather_descriptions.map(item=> item).join(' ')}</h1>
+                    <div class="more-info">
+                        <p>Humidity - ${data.current.humidity}%</p>
+                        <p>Wind Speed - ${data.current.wind_speed}km/hr</p>
+                        <p>Cloud Cover - ${data.current.cloudcover}%</p>
+                        <p>Wind Direction - ${data.current.wind_dir}</p>
+                    </div>
+                    <div class="query">${data.request.query}</div>`;
+                    details.innerHTML = html;
+            }
+        </script>
+    </body>
+</html>
